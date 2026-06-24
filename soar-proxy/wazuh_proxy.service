@@ -1,0 +1,12 @@
+[Unit]
+Description=Wazuh Proxy
+
+[Service]
+ExecStart=/usr/bin/python3 /tmp/wazuh_proxy.py
+Restart=always
+User=root
+StandardOutput=file:/tmp/proxy.log
+StandardError=file:/tmp/proxy.log
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,11 @@
+[Unit]
+Description=ClamAV Real-time File Monitor
+After=clamav-daemon.service
+
+[Service]
+ExecStart=/bin/bash /usr/local/bin/clamscan_monitor.sh
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target

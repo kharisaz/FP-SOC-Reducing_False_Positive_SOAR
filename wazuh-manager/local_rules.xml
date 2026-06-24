@@ -1,0 +1,72 @@
+<!-- Local rules -->
+<group name="local,syslog,sshd,">
+
+  <!-- SSH Brute Force dari IP spesifik -->
+  <rule id="100001" level="5">
+    <if_sid>5716</if_sid>
+    <srcip>1.1.1.1</srcip>
+    <description>sshd: authentication failed from IP 1.1.1.1.</description>
+    <group>authentication_failed,pci_dss_10.2.4,pci_dss_10.2.5,</group>
+  </rule>
+
+  <!-- EICAR / Malware Detection -->
+  <rule id="100005" level="12">
+    <if_sid>554</if_sid>
+    <match>eicar.com</match>
+    <description>CRITICAL: Malware (EICAR Virus) detected on the server!</description>
+    <group>malware_detection</group>
+  </rule>
+
+  <!-- DDoS: High frequency connection dari satu IP -->
+  <rule id="100010" level="10" frequency="50" timeframe="10">
+    <if_matched_sid>5706</if_matched_sid>
+    <description>DDoS: High frequency SSH connection attempts detected.</description>
+    <group>ddos,attack</group>
+  </rule>
+
+  <!-- DDoS: SYN Flood via kernel log -->
+  <rule id="100011" level="10">
+    <match>SYN flooding</match>
+    <description>DDoS: Possible SYN Flood attack detected.</description>
+    <group>ddos,attack</group>
+  </rule>
+
+  <!-- DDoS: ICMP Flood -->
+  <rule id="100012" level="8">
+    <match>possible SYN flooding on port</match>
+    <description>DDoS: ICMP/SYN flood indicator detected.</description>
+    <group>ddos,attack</group>
+  </rule>
+
+  <!-- Social Engineering: Suspicious sudo abuse -->
+  <rule id="100020" level="10">
+    <if_sid>5401</if_sid>
+    <match>sudo</match>
+    <description>Social Engineering: Unauthorized sudo attempt detected.</description>
+    <group>social_engineering,attack</group>
+  </rule>
+
+  <!-- Social Engineering: New user created -->
+  <rule id="100021" level="8">
+    <if_sid>5902</if_sid>
+    <description>Social Engineering: New user account created - possible insider threat.</description>
+    <group>social_engineering,attack</group>
+  </rule>
+
+  <!-- Social Engineering: SSH login dari IP baru yang tidak dikenal -->
+  <rule id="100022" level="8">
+    <if_sid>5715</if_sid>
+    <match>Accepted password</match>
+    <description>Social Engineering: Successful SSH login with password - verify legitimacy.</description>
+    <group>social_engineering,authentication_success</group>
+  </rule>
+
+  <!-- Social Engineering -->
+  <rule id="100023" level="10">
+    <if_group>web|syslog</if_group>
+    <match>phishing|stolen|POST /login</match>
+    <description>Social Engineering: Phishing page access - credential harvesting detected</description>
+    <group>social_engineering,attack</group>
+  </rule>
+
+</group>
