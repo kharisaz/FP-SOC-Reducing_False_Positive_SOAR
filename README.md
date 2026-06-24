@@ -39,6 +39,9 @@ Deteksi frekuensi koneksi tinggi (`Rule 100010` Level 10) memicu auto-mitigation
 
 Semua pengujian skenario di atas telah berhasil memicu notifikasi bot Telegram secara real-time langsung ke **Grup Telegram Tim (`-5490411645`)**.
 
+### D. Benchmark Metrics
+
+
 ---
 
 ## 4. Masalah Keamanan & Bug yang Telah Diselesaikan (Bug Fixes)
@@ -104,3 +107,43 @@ Sebelum memulai demo, pastikan firewall dalam kondisi bersih:
     2. Tunjukkan terminal Attacker langsung dipenuhi respon `Connection timed out`.
     3. Di **Target Server**, buktikan IP penyerang telah diblokir di `iptables` dengan perintah `sudo iptables -L INPUT -n`.
     4. Tunjukkan notifikasi alert DDoS di **Grup Telegram**.
+
+## 6. Benchmark Metriks
+
+### Deskripsi Umum
+
+Dokumen ini menjelaskan metodologi pengukuran performa sistem SOAR dalam memilah ancaman nyata dari noise alert, serta membuktikan kontribusi filter berbasis AI terhadap pengurangan False Positive pada pipeline deteksi ancaman.
+
+---
+
+### 1. Sumber Data
+
+Seluruh data diambil dari file log alert Wazuh di `/var/ossec/logs/alerts/alerts.json`. File ini merupakan akumulasi seluruh alert sejak Wazuh Manager pertama kali beroperasi, sehingga script benchmark saat ini menghitung keseluruhan histori, bukan hanya sesi pengujian terakhir. Untuk pengujian terisolasi, disarankan menambahkan filter tanggal atau membersihkan log sebelum sesi dimulai.
+
+---
+
+### 2. Definisi Metrik
+
+**Total Alerts** adalah jumlah keseluruhan baris pada `alerts.json`, yang menjadi penyebut utama seluruh perhitungan persentase.
+
+**True Positive (TP)** adalah alert yang teridentifikasi sebagai ancaman nyata berdasarkan pencocokan Rule ID spesifik dari empat skenario serangan yang telah diimplementasikan.
+
+**False Positive (FP)** adalah selisih antara Total Alerts dan TP, merepresentasikan noise yang berhasil difilter sebelum diteruskan ke Shuffle. Persentase keduanya dihitung dengan formula berikut.
+
+```
+TP (%) = (TP / Total Alerts) × 100
+FP (%) = (FP / Total Alerts) × 100
+```
+### 3. Pipeline Filter (Before vs After AI)
+
+Tanpa filter AI, seluruh alert diteruskan langsung ke Shuffle termasuk yang bersifat noise. Setelah ditambahkan filter berbasis model Qwen2.5:1.5b via Ollama, setiap alert terlebih dahulu dianalisis oleh AI dan hanya alert yang terklasifikasi sebagai ancaman nyata yang diteruskan ke Shuffle untuk dieksekusi.
+
+---
+
+## 5. Output dan Pembaruan Otomatis
+
+Hasil benchmark disimpan ke `/home/azureuser/benchmark_result.txt` dan dapat diperbarui otomatis menggunakan cron job berikut.
+
+```bash
+*/5 * * * * /home/azureuser/benchmark.sh
+```
